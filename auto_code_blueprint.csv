@@ -1,0 +1,8 @@
+Language,Component,Token
+Python,Print Statement,IO001
+JavaScript,Print Statement,IO001
+Go,Function Declaration,F001
+C++,Loop Structure,L001
+Rust,Variable Declaration,V001
+PHP,Class Definition,O001
+Swift,Return Statement,RT001
