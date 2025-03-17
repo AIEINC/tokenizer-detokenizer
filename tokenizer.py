@@ -1,38 +1,66 @@
-import pandas as pd
 import json
 import re
 import sys
 
 # IP owned by Joseph Lacroix
+
+# Token Map for Multiple Languages
 token_map = {
-    "import": "I001",
-    "def": "F001",
-    "for": "L001",
-    "print": "IO01",
-    "if": "C001",
-    "var": "V001"
+    "Python": {
+        "import": "I001",
+        "def": "F001",
+        "for": "L001",
+        "print": "IO01",
+        "if": "C001",
+        "var": "V001"
+    },
+    "Go": {
+        "import": "I001",
+        "func": "F001",
+        "for": "L001",
+        "fmt.Println": "IO01",
+        "if": "C001",
+        "var": "V001"
+    },
+    "JavaScript": {
+        "import": "I001",
+        "function": "F001",
+        "for": "L001",
+        "console.log": "IO01",
+        "if": "C001",
+        "let": "V001"
+    }
 }
 
-reverse_token_map = {v: k for k, v in token_map.items()}
+# Reverse Token Map for Detokenization
+reverse_token_map = {lang: {v: k for k, v in token_map[lang].items()} for lang in token_map}
 
-def tokenize_code(source_code):
+def tokenize_code(source_code, language):
+    if language not in token_map:
+        print(f"Unsupported language: {language}")
+        return []
+
     lines = source_code.split("\n")
     tokenized_code = []
 
     for line in lines:
         line = line.strip()
-        for keyword, token in token_map.items():
+        for keyword, token in token_map[language].items():
             if re.match(f"^{keyword}\b", line):
                 tokenized_code.append(token)
                 break
 
     return tokenized_code
 
-def detokenize_code(token_list):
+def detokenize_code(token_list, language):
+    if language not in reverse_token_map:
+        print(f"Unsupported language: {language}")
+        return ""
+
     detokenized_code = []
     for token in token_list:
-        if token in reverse_token_map:
-            detokenized_code.append(reverse_token_map[token])
+        if token in reverse_token_map[language]:
+            detokenized_code.append(reverse_token_map[language][token])
         else:
             detokenized_code.append("# UNKNOWN TOKEN")
     return "\n".join(detokenized_code)
@@ -49,9 +77,10 @@ def save_detokenized_output(detokenized_code, output_file):
 
 def main():
     mode = input("Enter mode (tokenize/detokenize): ").strip().lower()
+    language = input("Enter programming language (Python/Go/JavaScript): ").strip()
 
     if mode == "tokenize":
-        file_path = input("Enter the path to the source code file (.py or .go): ")
+        file_path = input("Enter the path to the source code file: ")
         try:
             with open(file_path, "r") as f:
                 source_code = f.read()
@@ -59,7 +88,7 @@ def main():
             print(f"Error reading the source code file: {e}")
             sys.exit(1)
 
-        tokens = tokenize_code(source_code)
+        tokens = tokenize_code(source_code, language)
         print("\nTokenized Code:", tokens)
 
         output_file = "tokenized_output.json"
@@ -75,11 +104,11 @@ def main():
             print(f"Error reading the tokenized file: {e}")
             sys.exit(1)
 
-        detokenized_code = detokenize_code(tokens)
+        detokenized_code = detokenize_code(tokens, language)
         print("\nDetokenized Code:")
         print(detokenized_code)
 
-        output_file = "detokenized_output.py"
+        output_file = f"detokenized_output.{language.lower()}"
         save_detokenized_output(detokenized_code, output_file)
     else:
         print("Invalid mode selected.")
