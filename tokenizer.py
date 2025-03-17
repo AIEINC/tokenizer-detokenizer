@@ -1,114 +1,136 @@
 import json
-import re
-import sys
 import pandas as pd
-import requests
+import re
 import os
 
-# IP owned by Joseph Lacroix
-
-# Token Map for Multiple Languages
-token_map = {
-    "Python": {"import": "I001", "def": "F001", "for": "L001", "print": "IO01", "if": "C001", "var": "V001"},
-    "Go": {"import": "I001", "func": "F001", "for": "L001", "fmt.Println": "IO01", "if": "C001", "var": "V001"},
-    "JavaScript": {"import": "I001", "function": "F001", "for": "L001", "console.log": "IO01", "if": "C001", "let": "V001"},
-    "C++": {"#include": "I001", "int main()": "F001", "for": "L001", "std::cout": "IO01", "if": "C001", "int": "V001"},
-    "Rust": {"use": "I001", "fn main()": "F001", "for": "L001", "println!": "IO01", "if": "C001", "let": "V001"},
-    "PHP": {"<?php": "I001", "function": "F001", "for": "L001", "echo": "IO01", "if": "C001", "$var": "V001"},
-    "Swift": {"import": "I001", "func": "F001", "for": "L001", "print": "IO01", "if": "C001", "var": "V001"}
+# Token mappings for multiple languages
+token_maps = {
+    "Python": {
+        "import": "I001", "def": "F001", "for": "L001", "while": "L002",
+        "if": "C001", "elif": "C002", "else": "C003", "print": "IO001",
+        "return": "RT001", "try": "E001", "except": "E002", "raise": "E003",
+        "class": "O001", "self": "O002", "with": "R001", "open": "FS001",
+        "read": "FS002", "write": "FS003", "append": "FS004", "int": "DT001",
+        "float": "DT002", "str": "DT003", "list": "DT004", "dict": "DT005"
+    },
+    "JavaScript": {
+        "function": "F001", "console.log": "IO001", "if": "C001", "else": "C003",
+        "for": "L001", "while": "L002", "return": "RT001", "try": "E001",
+        "catch": "E002", "throw": "E003", "class": "O001", "this": "O002",
+        "let": "V001", "const": "V002", "var": "V003"
+    },
+    "Go": {
+        "package": "I001", "func": "F001", "for": "L001", "if": "C001",
+        "else": "C003", "return": "RT001", "defer": "R001", "import": "I002",
+        "struct": "O001", "var": "V001", "const": "V002"
+    },
+    "C++": {
+        "#include": "I001", "int main()": "F001", "std::cout": "IO001",
+        "if": "C001", "else": "C003", "for": "L001", "while": "L002",
+        "return": "RT001", "try": "E001", "catch": "E002", "throw": "E003",
+        "class": "O001", "this": "O002", "int": "DT001", "float": "DT002",
+        "string": "DT003", "vector": "DT004", "map": "DT005"
+    }
 }
 
-reverse_token_map = {lang: {v: k for k, v in token_map[lang].items()} for lang in token_map}
+# Reverse mapping for de-tokenization
+reverse_token_maps = {lang: {v: k for k, v in token_map.items()} for lang, token_map in token_maps.items()}
 
 def tokenize_code(source_code, language):
-    if language not in token_map:
-        print(f"Unsupported language: {language}")
+    """
+    Converts source code into a tokenized format based on language.
+    """
+    if language not in token_maps:
+        print(f"❌ Unsupported language: {language}")
         return []
 
+    token_map = token_maps[language]
     lines = source_code.split("\n")
     tokenized_code = []
 
     for line in lines:
         line = line.strip()
-        for keyword, token in token_map[language].items():
-            if re.match(f"^{keyword}\b", line):
+        for keyword, token in token_map.items():
+            if re.match(f"^{keyword}\\b", line):
                 tokenized_code.append(token)
                 break
+        else:
+            tokenized_code.append(line)  # Keep unknown lines as is
 
     return tokenized_code
 
 def detokenize_code(token_list, language):
-    if language not in reverse_token_map:
-        print(f"Unsupported language: {language}")
+    """
+    Converts tokenized code back into readable source code based on language.
+    """
+    if language not in reverse_token_maps:
+        print(f"❌ Unsupported language: {language}")
         return ""
 
     detokenized_code = []
+    
     for token in token_list:
-        if token in reverse_token_map[language]:
-            detokenized_code.append(reverse_token_map[language][token])
+        if token in reverse_token_maps[language]:
+            detokenized_code.append(reverse_token_maps[language][token])
         else:
-            detokenized_code.append("# UNKNOWN TOKEN")
+            detokenized_code.append(token)  # Keep unknown tokens as is
+    
     return "\n".join(detokenized_code)
 
 def generate_code_from_spreadsheet(file_path):
+    """
+    Reads a spreadsheet, extracts function definitions and mappings, 
+    tokenizes them, and converts them into structured multi-language code.
+    """
     df = pd.read_excel(file_path)
-    code_output = ""
+    generated_files = {}
 
     for index, row in df.iterrows():
-        language = row["Language"]
-        component = row["Component"]
-        token = row["Token"]
+        language = row.get("Language", "Python")  # Default to Python
+        component = row.get("Component", "")
+        token = row.get("Token", "")
 
-        if language in reverse_token_map and token in reverse_token_map[language]:
-            code_output += reverse_token_map[language][token] + "\n"
+        if language not in reverse_token_maps:
+            continue
+
+        if token in reverse_token_maps[language]:
+            code_line = reverse_token_maps[language][token]
         else:
-            code_output += f"# UNKNOWN TOKEN: {token}\n"
+            code_line = f"# UNKNOWN TOKEN: {token}"
 
-    with open("generated_program.txt", "w") as f:
-        f.write(code_output)
+        if language not in generated_files:
+            generated_files[language] = []
 
-    print("✅ Code generated from spreadsheet and saved to generated_program.txt")
+        generated_files[language].append(code_line)
 
-def upload_to_cloud(filename):
-    print("🌐 Uploading file to Google Drive...")
-    os.system(f"rclone copy {filename} gdrive:/Tokenizer-Backup/")
-    print("✅ File successfully uploaded.")
+    for lang, code_lines in generated_files.items():
+        output_file = f"generated_code_{lang.lower()}.{lang.lower()}"
+        with open(output_file, "w") as f:
+            f.write("\n".join(code_lines))
 
-def save_tokenized_output(tokens, output_file):
-    with open(output_file, "w") as f:
-        json.dump({"tokens": tokens}, f, indent=4)
-    print(f"Tokenized output saved to {output_file}")
-    upload_to_cloud(output_file)
+        print(f"✅ Code for {lang} saved as {output_file}")
 
-def save_detokenized_output(detokenized_code, output_file):
-    with open(output_file, "w") as f:
-        f.write(detokenized_code)
-    print(f"Detokenized code saved to {output_file}")
-    upload_to_cloud(output_file)
-
-def main():
+if __name__ == "__main__":
     mode = input("Enter mode (tokenize/detokenize/spreadsheet): ").strip().lower()
 
     if mode == "spreadsheet":
         file_path = input("Enter the path to the spreadsheet file: ")
         generate_code_from_spreadsheet(file_path)
-        return
-
-    language = input("Enter programming language: ").strip()
-
-    if mode == "tokenize":
+    elif mode == "tokenize":
+        language = input("Enter programming language: ").strip()
         file_path = input("Enter the path to the source code file: ")
         with open(file_path, "r") as f:
             source_code = f.read()
         tokens = tokenize_code(source_code, language)
-        save_tokenized_output(tokens, "tokenized_output.json")
-
+        with open(f"tokenized_output_{language}.json", "w") as f:
+            json.dump({"tokens": tokens}, f, indent=4)
+        print(f"✅ Tokenized output saved as tokenized_output_{language}.json")
     elif mode == "detokenize":
+        language = input("Enter programming language: ").strip()
         file_path = input("Enter the path to the tokenized JSON file: ")
         with open(file_path, "r") as f:
             token_data = json.load(f)
         detokenized_code = detokenize_code(token_data.get("tokens", []), language)
-        save_detokenized_output(detokenized_code, f"detokenized_output.{language.lower()}")
-
-if __name__ == "__main__":
-    main()
+        with open(f"detokenized_output_{language}.{language.lower()}", "w") as f:
+            f.write(detokenized_code)
+        print(f"✅ De-tokenized output saved as detokenized_output_{language}.{language.lower()}")
