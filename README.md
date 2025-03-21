@@ -1,142 +1,124 @@
-# Tokenization-Based Auto-Code Generation System
+Here’s a clean, upload-ready README summary for your GitHub repo, complete with a feature overview, usage, and deployment instructions:
+
+
+---
+
+# Tokenizer-Detokenizer: AI-Driven Multi-Language Auto-Code Generator
 
 ## Overview
-This program is a **universal auto-code generation engine** that allows users to **create complete software programs** by utilizing **tokenization, spreadsheets, and multi-language code assembly**.
 
-It is designed to work within **Termux, Linux, and cloud environments**, and it enables **AI-assisted program creation** by mapping different programming languages into **a unified tokenized format**.
+This project is an AI-assisted code generation engine that tokenizes and detokenizes multiple programming languages using a spreadsheet-driven approach. By defining token references for code components in a spreadsheet, you can generate fully functional source code in different languages — including Python, JavaScript, Go, C++, Rust, PHP, and Swift — directly from structured inputs.
 
----
+## Key Features
 
-## 🚀 Features
-✅ **Multi-Language Tokenization & Detokenization** (Python, Go, JavaScript, C++, Rust, PHP, Swift)  
-✅ **Spreadsheet-Driven Auto-Code Generation**  
-✅ **Auto-Code Assembly (Multi-Language Software Creation)**  
-✅ **Cloud Backup & GitHub Auto-Sync**  
-✅ **Secure Keystore & Cryptographic Fingerprinting**  
-✅ **Termux-Compatible for On-the-Go Development**  
+- **Multi-language support**: Tokenization for Python, JavaScript, Go, C++, Rust, PHP, Swift.
+- **Spreadsheet-based code generation**: Use Excel or CSV to define your program components.
+- **AI-ready token mappings**: Clean token-to-code abstraction for functional transformation.
+- **Command-line operation**: Fully functional in Termux and Linux environments.
+- **Automatic GitHub deployment**: Easily push updates to your repository using one script.
+- **Testing framework**: Auto-validation of token mappings and output accuracy.
 
 ---
 
-## 📌 How It Works
+## How It Works
 
-### 1️⃣ Tokenization Process
-- **Reads a source code file** (e.g., Python, JavaScript, etc.).
-- **Identifies common keywords, functions, and structures**.
-- **Replaces them with short tokens** for **compressed representation**.
-- **Saves tokenized output as JSON**.
-
-### 2️⃣ Spreadsheet-Based Auto-Code Generation
-- Users **define a program’s functionality in a spreadsheet**.
-- The spreadsheet **maps required features to tokenized components**.
-- The engine **assembles code automatically** from tokenized language data.
-
-### 3️⃣ Auto-Code Assembly (Multi-Language Support)
-- **Reads spreadsheet design** and **fetches required tokens**.
-- **De-tokenizes into complete, working source code**.
-- **Supports single or multi-language software development**.
+1. **Tokenization**: Source code is scanned and reduced to short tokens (e.g. `F001`, `IO001`).
+2. **Spreadsheet Mapping**: Tokens are assigned to components in a spreadsheet.
+3. **Code Generation**: The system reads the spreadsheet and outputs full source code.
+4. **De-tokenization**: Reverses tokens back into working code for each language.
 
 ---
 
-## 📌 Example: Tokenization
+## Directory Structure
 
-### 🚀 Original Python Code
-```python
-import os
-
-def read_file(filename):
-    with open(filename, "r") as file:
-        return file.read()
-
-print(read_file("data.txt"))
-```
-
-### 🎯 Tokenized Version
-```json
-{
-    "tokens": ["I001", "F001", "L001", "IO01"]
-}
-```
-
-### 🔄 De-Tokenized Version
-```python
-import os
-
-def read_file(filename):
-    with open(filename, "r") as file:
-        return file.read()
-
-print(read_file("data.txt"))
-```
+/tokenizer-detokenizer/ │ ├── tokenizer.py               # Main script: tokenize, detokenize, or use spreadsheet ├── test_tokenizer.py          # Automated test suite for supported languages ├── create_required_files.sh   # Initializes required files for all supported languages ├── update.sh                  # GitHub push/update script ├── all_in_one.sh              # Full setup, test, and deploy script ├── auto_code_blueprint.csv    # Sample spreadsheet for multi-language code generation ├── tokenized_output_.json    # Tokenized output files per language ├── detokenized_output_       # Reconstructed code output files └── generated_code_*           # Code generated from spreadsheet
 
 ---
 
-## 📌 Spreadsheet Format for Auto-Code Generation
-| **Component**  | **Type**      | **Functionality** | **Language** | **Token Reference** |
-|---------------|--------------|------------------|--------------|--------------------|
-| User Input   | UI Element   | Accepts user text | Python, JS   | `INPUT01` |
-| Database     | Storage      | Saves user data   | MySQL, PostgreSQL | `DB01` |
-| Processing   | Function     | Computes result   | Python       | `F001` |
-| Output       | UI Element   | Displays results  | HTML, JS     | `OUTPUT01` |
+## Usage Instructions
 
----
-
-## 📌 NEGBT Prompt for Spreadsheet Creation
-
-This AI prompt will allow **GPT models** to generate structured **spreadsheets** that serve as blueprints for the **Auto-Code program**.
-
-### **Prompt for AI**
-```
-You are an advanced AI that assists in generating structured **spreadsheet-based program blueprints** for an **AI-powered code generation system**.
-Generate a **CSV/Excel spreadsheet** that outlines the program structure based on user input.
-Each row should represent a **functional component of the program** and map it to **predefined tokens** that the Auto-Code engine will recognize.
-
-Example Output:
-| Component | Type | Functionality | Language | Token Reference |
-|-----------|------|--------------|----------|-----------------|
-| API Endpoint | Backend API | Handle user requests | Python Flask | `API01` |
-| Database Model | Storage | Store user data | MySQL | `DB01` |
-| Authentication | Security | User login/logout | Python JWT | `AUTH01` |
-| Response | Output | Send JSON responses | Python | `OUTPUT01` |
-
-Output the spreadsheet in CSV or Excel format.
-```
----
-
-## 📌 How to Use
-1️⃣ **Clone the Repository**
-```bash
-git clone https://github.com/AIEINC/tokenizer-detokenizer.git
-cd tokenizer-detokenizer
-```
-
-2️⃣ **Run Tokenization or De-Tokenization**
+### 1. Tokenize Source Code
 ```bash
 python tokenizer.py
-```
+# Select "tokenize"
+# Choose your language
+# Enter source file path
 
-3️⃣ **Use a Spreadsheet to Generate a Full Program**
-- Create a **spreadsheet (CSV/Excel)** following the provided format.
-- Run the Auto-Code program to generate working source code.
+2. De-tokenize JSON File
 
-4️⃣ **Push Changes to GitHub**
-```bash
-git add .
-git commit -m "Updated tokenization and auto-code generation system"
-git push origin main
-```
+python tokenizer.py
+# Select "detokenize"
+# Choose language
+# Enter path to tokenized JSON
 
----
+3. Generate Code from Spreadsheet
 
-## 📌 Summary
-🚀 **Write software using AI & tokenization**  
-🚀 **Supports multiple programming languages**  
-🚀 **Runs in Termux, Linux, and cloud environments**  
-🚀 **Generates fully working programs from a spreadsheet**  
-🚀 **Automatically stores & updates code in GitHub and cloud storage**  
+python tokenizer.py
+# Select "spreadsheet"
+# Provide path to CSV or Excel file
+
 
 ---
 
-## 📌 Future Enhancements
-- ✅ **Add AI-powered program suggestions**  
-- ✅ **Expand to support AI-driven unit testing**  
-- ✅ **Integrate GPT for more advanced code generation**  
+Deployment Instructions
+
+1. Run Full Setup, Test & Push
+
+chmod +x all_in_one.sh
+./all_in_one.sh
+
+2. Push Updates to GitHub
+
+chmod +x update.sh
+./update.sh
+
+3. Manual File Setup (if needed)
+
+chmod +x create_required_files.sh
+./create_required_files.sh
+
+
+---
+
+Spreadsheet Format
+
+
+---
+
+Testing
+
+Run the test suite:
+
+python test_tokenizer.py
+
+Verifies tokenized output matches expected mappings
+
+Supports Python, JavaScript, Go (expandable)
+
+
+
+---
+
+Contribution & Roadmap
+
+[ ] Add support for Kotlin, TypeScript, Shell, and Java
+
+[ ] Integrate GPT-based prompt-to-token conversion
+
+[ ] Add web UI for spreadsheet uploads
+
+[ ] Cloud sync with rclone + GDrive/Dropbox
+
+
+
+---
+
+License
+
+(c) Joseph Lacroix - AIEINC
+This repository and its contents are protected and proprietary.
+
+---
+
+Would you like me to export this to a `README.md` file for direct upload or commit?
+
